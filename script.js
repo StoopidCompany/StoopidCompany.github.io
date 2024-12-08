@@ -1,7 +1,22 @@
 document.getElementById('coolButton').addEventListener('click', function() {
-    document.getElementById('response').innerHTML = "<img src=\"assets/wow.gif\" alt=\"Wow!\"><p>Wow! Thanks for clicking!</p><p>We have code solutions like you wouldn't believe! What are you worried about? Come get AI solutions. Call us up (<b><a href=\"tel:+14107010140\">410-701-0140</a></b>), and order some software and AI solutions today.</p><p>We also are able to receive electronic mail at <a href=\"mailto:hello@stoopid.email\">hello@stoopid.email</a></p>";
+    document.getElementById('response').innerHTML = "<img src=\"assets/wow.gif\" alt=\"Wow!\"><p>Wow! Thanks for clicking!</p><p>We have code solutions like you wouldn't believe! What are you worried about? Come get AI solutions. Call us up (<b><a href=\"tel:+14107010140\">410-701-0140</a></b>), and order some software and AI solutions today.</p><p>We also are able to receive electronic mail at <a href=\"mailto:hello@stoopid.email\">hello@stoopid.email</a></p><h1>Enjoy the movie!</h1><div id=\"theater\"><div id=\"screen\"><pre id=\"output\"></pre></div></div>";
 
     window.open('https://www.jasonanton.com', '_blank');
+
+    var audio = new Audio('assets/sw.mp3');
+    audio.play();
+
+    const output = document.getElementById('output');
+    const ws = new WebSocket('ws://localhost:8080');
+
+    ws.onmessage = event => {
+        output.textContent = event.data;
+    };
+
+    ws.onopen = () => {
+        console.log('Enjoy the movie!');
+        console.log('yes this is telnet Star Wars via a websocket connection...');
+    };
 });
 
 function cornify() {
