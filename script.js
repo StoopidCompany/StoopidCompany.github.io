@@ -1,5 +1,5 @@
 document.getElementById('coolButton').addEventListener('click', function() {
-    document.getElementById('response').innerHTML = "<img src=\"assets/wow.gif\" alt=\"Wow!\"><p>Wow! Thanks for clicking!</p><p>We have code solutions like you wouldn't believe! What are you worried about? Come get AI solutions. Call us up (<b><a href=\"tel:+14107010140\">410-701-0140</a></b>), and order some software and AI solutions today.</p><p>We also are able to receive electronic mail at <a href=\"mailto:hello@stoopid.email\">hello@stoopid.email</a></p><h1>Enjoy the movie!</h1><div id=\"theater\"><div id=\"screen\"><pre id=\"output\">The Stoopid Theater Proudly Presents...</pre></div></div><button id=\"stopAudioButton\">Stop The Music</button>";
+    document.getElementById('response').innerHTML = "<img src=\"assets/wow.gif\" alt=\"Wow!\"><p>Wow! Thanks for clicking!</p><p>We have code solutions like you wouldn't believe! What are you worried about? Come get AI solutions. Call us up (<b><a href=\"tel:+14107010140\">410-701-0140</a></b>), and order some software and AI solutions today.</p><p>We also are able to receive electronic mail at <a href=\"mailto:hello@stoopid.email\">hello@stoopid.email</a></p><h1>Enjoy the movie!</h1><h3>You can re-click the button at any time to go to the other site.</h3><div id=\"theater\"><div id=\"screen\"><pre id=\"output\">The Stoopid Theater Proudly Presents...</pre></div></div><button id=\"stopAudioButton\">Stop The Music</button>";
 
     if (confirm('Hit OK to see my real website, click Cancel to relax and watch a movie.')) {
         window.location.href = 'https://www.jasonanton.com';
@@ -8,13 +8,21 @@ document.getElementById('coolButton').addEventListener('click', function() {
     
         document.getElementById('stopAudioButton').addEventListener('click', function() {
             audioMovie.pause();
-            audioMovie.currentTime = 0; 
+            // audioMovie.currentTime = 0; 
         });
 
         const output = document.getElementById('output');
+
+        const ws = new WebSocket('wss://stoopidmovie.fly.dev/');
+        var i=0;
         
-        setTimeout(() => {
-            output.textContent = `
+        ws.onmessage = event => {
+            if (i < 55) i++;
+
+            if (i === 1) {
+                output.textContent = 'The Stoopid Theater Proudly Presents...'
+            } else if (i === 2) {
+                output.textContent = `
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⠀⢀⣤⣤⣤⣤⣤⣤⣤⠀⠀⠀⠀⢠⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⣼⣿⣿⣿⣿⣿⣿⣿⣇⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣟⠛⠛⠛⠛⠛⣿⣿⣿⣿⡟⠛⠛⠛⠛⠛⢠⣿⣿⣿⣿⠿⣿⣿⣿⣿⡀⠀⠀⢸⣿⣿⣿⣿⡏⠉⠉⢉⣿⣿⣿⣿⡇⠀⠀⠀⠀
@@ -30,32 +38,27 @@ document.getElementById('coolButton').addEventListener('click', function() {
 ⠀⠀⠀⢻⣿⣿⣿⣿⡏⠀⢹⣿⣿⣿⣿⡟⠀⢀⣿⣿⣿⣿⡟⠛⠛⠛⠛⣿⣿⣿⣿⡆⠀⣿⣿⣿⣿⣿⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠀⠀⠀⠀
 ⠀⠀⠀⠈⠉⠉⠉⠉⠀⠀⠀⠉⠉⠉⠉⠁⠀⠈⠉⠉⠉⠉⠀⠀⠀⠀⠀⠉⠉⠉⠉⠉⠀⠉⠉⠉⠉⠉⠀⠀⠀⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀
             \nvia telnet towel.blinkenlights.nl`;
-
-            setTimeout(() => {
+            } else if (i === 3) {
                 output.textContent = 'Enjoy!';
+            } else {
+                output.textContent = event.data;
+            }
 
-                setTimeout(() => {
-                    const ws = new WebSocket('wss://stoopidmovie.fly.dev/');
-                    var i=0;
-                    
-                    ws.onmessage = event => {
-                        output.textContent = event.data;
+            if (i === 54) {
+                audioMovie.play();        
+                
+                document.getElementById('stopAudioButton').addEventListener('click', function() {
+                    if (audioMovie) {
+                        audioMovie.pause();
+                        audioMovie.currentTime = 0; 
+                    }
+                });
+            }
+        };
 
-                        if (i < 54) i++;
-
-                        if (i === 54) {
-                            audioMovie.play();
-                        }
-                    };
-
-                    ws.onopen = () => {
-                        console.log('Enjoy telnet Star Wars via a websocket connection!');
-                    };
-                }, 3000);
-
-            }, 3000);
-
-        }, 3000);
+        ws.onopen = () => {
+            console.log('Enjoy telnet Star Wars via a websocket connection!');
+        };
     }
 });
 
