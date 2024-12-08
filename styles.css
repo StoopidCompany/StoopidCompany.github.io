@@ -55,3 +55,20 @@ button:hover {
 .footer img {
     margin: 5px;
 }
+
+#theater {
+    border: 5px solid black;
+    border-radius: 10px;
+    width: 520px;
+    margin: 20px auto;
+    background-color: #000;
+    color: #0f0;
+    padding: 20px;
+}
+#screen {
+    border: 2px dashed #888;
+    padding: 10px;
+    height: 300px;
+    overflow: hidden;
+    text-align: center;
+}
