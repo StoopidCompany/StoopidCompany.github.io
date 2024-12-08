@@ -1,22 +1,62 @@
 document.getElementById('coolButton').addEventListener('click', function() {
-    document.getElementById('response').innerHTML = "<img src=\"assets/wow.gif\" alt=\"Wow!\"><p>Wow! Thanks for clicking!</p><p>We have code solutions like you wouldn't believe! What are you worried about? Come get AI solutions. Call us up (<b><a href=\"tel:+14107010140\">410-701-0140</a></b>), and order some software and AI solutions today.</p><p>We also are able to receive electronic mail at <a href=\"mailto:hello@stoopid.email\">hello@stoopid.email</a></p><h1>Enjoy the movie!</h1><div id=\"theater\"><div id=\"screen\"><pre id=\"output\"></pre></div></div>";
+    document.getElementById('response').innerHTML = "<img src=\"assets/wow.gif\" alt=\"Wow!\"><p>Wow! Thanks for clicking!</p><p>We have code solutions like you wouldn't believe! What are you worried about? Come get AI solutions. Call us up (<b><a href=\"tel:+14107010140\">410-701-0140</a></b>), and order some software and AI solutions today.</p><p>We also are able to receive electronic mail at <a href=\"mailto:hello@stoopid.email\">hello@stoopid.email</a></p><h1>Enjoy the movie!</h1><div id=\"theater\"><div id=\"screen\"><pre id=\"output\">The Stoopid Theater Proudly Presents...</pre></div></div><button id=\"stopAudioButton\">Stop The Music</button>";
 
-    window.open('https://www.jasonanton.com', '_blank');
+    if (confirm('Hit OK to see my real website, click Cancel to relax and watch a movie.')) {
+        window.location.href = 'https://www.jasonanton.com';
+    } else {
+        var audioMovie = new Audio('assets/sw.mp3');
+    
+        document.getElementById('stopAudioButton').addEventListener('click', function() {
+            audioMovie.pause();
+            audioMovie.currentTime = 0; 
+        });
 
-    var audio = new Audio('assets/sw.mp3');
-    audio.play();
+        const output = document.getElementById('output');
+        
+        setTimeout(() => {
+            output.textContent = `
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⠀⢀⣤⣤⣤⣤⣤⣤⣤⠀⠀⠀⠀⢠⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⣼⣿⣿⣿⣿⣿⣿⣿⣇⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣟⠛⠛⠛⠛⠛⣿⣿⣿⣿⡟⠛⠛⠛⠛⠛⢠⣿⣿⣿⣿⠿⣿⣿⣿⣿⡀⠀⠀⢸⣿⣿⣿⣿⡏⠉⠉⢉⣿⣿⣿⣿⡇⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⣿⣿⣷⡀⠀⠀⠀⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⣾⣿⣿⣿⡟⠀⢻⣿⣿⣿⣧⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠀⠀⠀⠀⠀
+⣤⣤⣤⣤⣤⣤⣤⣤⣤⣬⣿⣿⣿⣿⣿⣷⠀⠀⠀⣿⣿⣿⣿⡇⠀⠀⠀⠀⢰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡆⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⣤⣤⣤⣤⣤⣤
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀⣿⣿⣿⣿⡇⠀⠀⠀⢀⣿⣿⣿⣿⡿⠿⠿⠿⠿⣿⣿⣿⣿⡀⢸⣿⣿⣿⣿⡇⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠟⠛⠁⠀⠀⠀⠀⠿⠿⠿⠿⠇⠀⠀⠀⠸⠿⠿⠿⠟⠀⠀⠀⠀⠀⠻⠿⠿⠿⠇⠸⠿⠿⠿⠿⠇⠀⠀⠙⠛⠿⠿⠿⠿⠿⠿⠿⠿
+⢻⣿⣿⣿⣿⡄⢠⣿⣿⣿⣿⣿⡆⠀⣾⣿⣿⣿⡟⠀⢀⣾⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣦⣄⠀⠀⠀⠀⣠⣶⣶⣿⣿⣿⣿⣿⣿⣿⣿
+⠈⣿⣿⣿⣿⣷⣼⣿⣿⣿⣿⣿⣿⣸⣿⣿⣿⣿⠁⠀⣼⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⠀⠀⣿⣿⣿⣿⣿⠿⠿⢿⣿⣿⣿⣿⣇⠀⠀⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡏⠀⢠⣿⣿⣿⣿⠏⢿⣿⣿⣿⣇⠀⠀⠀⣿⣿⣿⣿⣿⣀⣀⣀⣼⣿⣿⣿⡟⠀⠀⢹⣿⣿⣿⣿⣿⣄⠀⠀⠀⠀⠀
+⠀⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⣾⣿⣿⣿⣟⣀⣸⣿⣿⣿⣿⡀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠁⠀⠀⠀⠙⢿⣿⣿⣿⣿⣧⠀⠀⠀⠀
+⠀⠀⠘⣿⣿⣿⣿⣿⣿⠋⣿⣿⣿⣿⣿⣿⠇⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠀⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⣶⣶⣶⣶⣶⣶⣾⣿⣿⣿⣿⣿⠇⠀⠀⠀
+⠀⠀⠀⢻⣿⣿⣿⣿⡏⠀⢹⣿⣿⣿⣿⡟⠀⢀⣿⣿⣿⣿⡟⠛⠛⠛⠛⣿⣿⣿⣿⡆⠀⣿⣿⣿⣿⣿⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠀⠀⠀⠀
+⠀⠀⠀⠈⠉⠉⠉⠉⠀⠀⠀⠉⠉⠉⠉⠁⠀⠈⠉⠉⠉⠉⠀⠀⠀⠀⠀⠉⠉⠉⠉⠉⠀⠉⠉⠉⠉⠉⠀⠀⠀⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀
+            \nvia telnet towel.blinkenlights.nl`;
 
-    const output = document.getElementById('output');
-    const ws = new WebSocket('ws://localhost:8080');
+            setTimeout(() => {
+                output.textContent = 'Enjoy!';
 
-    ws.onmessage = event => {
-        output.textContent = event.data;
-    };
+                setTimeout(() => {
+                    const ws = new WebSocket('ws://stoopidmovie.fly.dev/');
+                    var i=0;
+                    
+                    ws.onmessage = event => {
+                        output.textContent = event.data;
 
-    ws.onopen = () => {
-        console.log('Enjoy the movie!');
-        console.log('yes this is telnet Star Wars via a websocket connection...');
-    };
+                        if (i < 54) i++;
+
+                        if (i === 54) {
+                            audioMovie.play();
+                        }
+                    };
+
+                    ws.onopen = () => {
+                        console.log('Enjoy telnet Star Wars via a websocket connection!');
+                    };
+                }, 3000);
+
+            }, 3000);
+
+        }, 3000);
+    }
 });
 
 function cornify() {
