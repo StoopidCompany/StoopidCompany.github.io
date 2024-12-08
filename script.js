@@ -35,7 +35,7 @@ document.getElementById('coolButton').addEventListener('click', function() {
                 output.textContent = 'Enjoy!';
 
                 setTimeout(() => {
-                    const ws = new WebSocket('ws://stoopidmovie.fly.dev/');
+                    const ws = new WebSocket('wss://stoopidmovie.fly.dev/');
                     var i=0;
                     
                     ws.onmessage = event => {
