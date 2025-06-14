@@ -360,7 +360,14 @@ body {
     text-shadow: 2px 2px 0px #000;
 }
 
-/* Table styling for that authentic Geocities feel */
+.section-sub-header {
+    text-align: center;
+    padding: 10px;
+    margin: -15px -15px 15px -15px;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
 .info-table {
     width: 100%;
     border-collapse: separate;
@@ -430,6 +437,12 @@ body {
     color: #800080;
 }
 
+.form-row textarea {
+    width: 100%;
+    max-width: 50ch;
+    box-sizing: border-box;
+}
+
 .form-row input, .form-row textarea {
     border: 2px inset #808080;
     padding: 3px;
@@ -478,6 +491,16 @@ body {
 
 .link-item a:visited {
     color: #800080;
+}
+
+.logo-item {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+.logo-item img {
+    max-width: 100%;
+    height: auto;
 }
 
 /* Footer */
@@ -577,4 +600,12 @@ body {
     text-align: right;
     font-weight: bold;
     color: #555;
+}
+
+/* Fine-print text styling */
+.fine-print {
+    font-size: 0.8em;
+    color: #666666;
+    line-height: 1.4;
+    text-align: right;
 }
