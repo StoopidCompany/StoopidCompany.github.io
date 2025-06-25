@@ -135,6 +135,7 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+console.log('Howdy!')
 console.log("↑ ↑ ↓ ↓ ← → ← → B A ENTER");
 console.log('A B A C A B B')
 console.log(`
