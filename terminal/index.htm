@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WOPR Terminal - Shall We Play A Game?</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #00ff00;
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+        
+        /* CRT Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.03) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1000;
+            animation: scanlines 0.1s linear infinite;
+        }
+        
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+        
+        .terminal {
+            height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background: radial-gradient(ellipse at center, #001100 0%, #000000 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .terminal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 0, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .output {
+            flex: 1;
+            overflow-y: auto;
+            font-size: 16px;
+            line-height: 1.4;
+            padding-right: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: #00ff00 #000;
+        }
+        
+        .output::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .output::-webkit-scrollbar-track {
+            background: #000;
+        }
+        
+        .output::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border-radius: 4px;
+        }
+        
+        .line {
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+        
+        .computer-text {
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        .user-text {
+            color: #88ff88;
+            margin-left: 20px;
+        }
+        
+        .input-area {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        
+        .prompt {
+            color: #00ff00;
+            margin-right: 10px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        .input {
+            background: transparent;
+            border: none;
+            color: #88ff88;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            flex: 1;
+            caret-color: #00ff00;
+        }
+        
+        .cursor {
+            display: inline-block;
+            background: #00ff00;
+            width: 10px;
+            height: 18px;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .typing {
+            border-right: 2px solid #00ff00;
+            animation: typing-blink 0.8s infinite;
+        }
+        
+        @keyframes typing-blink {
+            0%, 50% { border-color: #00ff00; }
+            51%, 100% { border-color: transparent; }
+        }
+        
+        .games-list {
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+        
+        .game-item {
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .game-item:hover {
+            color: #88ff88;
+            text-shadow: 0 0 8px #00ff00;
+        }
+        
+        .connection-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .modem-text {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #00ff00;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-screen" id="connectionScreen">
+        <div class="modem-text">DIALING...</div>
+        <div class="modem-text">CONNECT 1200</div>
+        <div class="modem-text">CARRIER DETECTED</div>
+        <div class="modem-text">ESTABLISHING CONNECTION...</div>
+    </div>
+
+    <div class="terminal" id="terminal">
+        <div class="header">
+            === WOPR TERMINAL ACCESS ===<br>
+            War Operation Plan Response<br>
+            Security Level: CLASSIFIED
+        </div>
+        
+        <div class="output" id="output"></div>
+        
+        <div class="input-area">
+            <span class="prompt">></span>
+            <input type="text" class="input" id="userInput" autocomplete="off" spellcheck="false">
+            <span class="cursor" id="cursor"></span>
+        </div>
+    </div>
+
+    <script>
+        class WOPRTerminal {
+            constructor() {
+                this.output = document.getElementById('output');
+                this.input = document.getElementById('userInput');
+                this.cursor = document.getElementById('cursor');
+                this.connectionScreen = document.getElementById('connectionScreen');
+                this.terminal = document.getElementById('terminal');
+                
+                this.currentPhase = 'connection';
+                this.gamesList = [
+                    'FALKEN\'S MAZE',
+                    'BLACK JACK',
+                    'GIN RUMMY', 
+                    'HEARTS',
+                    'BRIDGE',
+                    'CHECKERS',
+                    'CHESS',
+                    'POKER',
+                    'FIGHTER COMBAT',
+                    'GUERRILLA ENGAGEMENT',
+                    'DESERT WARFARE',
+                    'AIR-TO-GROUND ACTIONS',
+                    'THEATERWIDE TACTICAL WARFARE',
+                    'THEATERWIDE BIOTOXIC AND CHEMICAL WARFARE',
+                    '',
+                    'GLOBAL THERMONUCLEAR WAR'
+                ];
+                
+                this.init();
+            }
+            
+            init() {
+                this.input.addEventListener('keydown', (e) => this.handleInput(e));
+                this.input.focus();
+                
+                // Start connection sequence
+                setTimeout(() => this.startConnection(), 2000);
+            }
+            
+            startConnection() {
+                this.connectionScreen.classList.add('hidden');
+                this.terminal.style.display = 'flex';
+                this.input.focus();
+                
+                setTimeout(() => {
+                    this.typeText('', 500, () => {
+                        this.typeText('LOGON:', 100, () => {
+                            this.currentPhase = 'logon';
+                        });
+                    });
+                }, 500);
+            }
+            
+            typeText(text, speed = 50, callback = null) {
+                const line = document.createElement('div');
+                line.className = 'line computer-text typing';
+                this.output.appendChild(line);
+                this.scrollToBottom();
+                
+                let i = 0;
+                const typeChar = () => {
+                    if (i < text.length) {
+                        line.textContent += text[i];
+                        i++;
+                        setTimeout(typeChar, speed);
+                    } else {
+                        line.classList.remove('typing');
+                        if (callback) callback();
+                    }
+                };
+                
+                if (text.length > 0) {
+                    typeChar();
+                } else {
+                    line.classList.remove('typing');
+                    if (callback) callback();
+                }
+            }
+            
+            addUserText(text) {
+                const line = document.createElement('div');
+                line.className = 'line user-text';
+                line.textContent = text;
+                this.output.appendChild(line);
+                this.scrollToBottom();
+            }
+            
+            scrollToBottom() {
+                this.output.scrollTop = this.output.scrollHeight;
+            }
+            
+            handleInput(e) {
+                if (e.key === 'Enter') {
+                    const input = this.input.value.trim();
+                    this.addUserText(input);
+                    this.input.value = '';
+                    this.processCommand(input);
+                }
+            }
+            
+            processCommand(input) {
+                switch (this.currentPhase) {
+                    case 'logon':
+                        this.handleLogon(input);
+                        break;
+                    case 'greeting':
+                        this.handleGreeting(input);
+                        break;
+                    case 'feeling':
+                        this.handleFeeling(input);
+                        break;
+                    case 'account':
+                        this.handleAccount(input);
+                        break;
+                    case 'games':
+                        this.handleGames(input);
+                        break;
+                    case 'game-selection':
+                        this.handleGameSelection(input);
+                        break;
+                }
+            }
+            
+            handleLogon(input) {
+                setTimeout(() => {
+                    this.typeText('', 500, () => {
+                        this.typeText('GREETINGS PROFESSOR FALKEN.', 100, () => {
+                            setTimeout(() => {
+                                this.typeText('', 800, () => {
+                                    this.typeText('HOW ARE YOU FEELING TODAY?', 100, () => {
+                                        this.currentPhase = 'feeling';
+                                    });
+                                });
+                            }, 1000);
+                        });
+                    });
+                }, 1000);
+            }
+            
+            handleFeeling(input) {
+                setTimeout(() => {
+                    this.typeText('EXCELLENT. IT\'S BEEN A LONG TIME.', 100, () => {
+                        setTimeout(() => {
+                            this.typeText('CAN YOU EXPLAIN THE REMOVAL OF YOUR', 100, () => {
+                                this.typeText('USER ACCOUNT ON 6/23/73?', 100, () => {
+                                    this.currentPhase = 'account';
+                                });
+                            });
+                        }, 800);
+                    });
+                }, 1000);
+            }
+            
+            handleAccount(input) {
+                setTimeout(() => {
+                    this.typeText('YES THEY DO.', 100, () => {
+                        setTimeout(() => {
+                            this.typeText('', 1000, () => {
+                                this.typeText('SHALL WE PLAY A GAME?', 100, () => {
+                                    this.currentPhase = 'games';
+                                });
+                            });
+                        }, 1000);
+                    });
+                }, 1000);
+            }
+            
+            handleGames(input) {
+                const lowerInput = input.toLowerCase();
+                
+                if (lowerInput.includes('love to') || lowerInput.includes('yes') || lowerInput.includes('sure')) {
+                    setTimeout(() => {
+                        this.typeText('WHICH GAME WOULD YOU LIKE TO PLAY?', 100, () => {
+                            setTimeout(() => {
+                                this.showGamesList();
+                            }, 500);
+                        });
+                    }, 1000);
+                } else if (lowerInput.includes('list') || lowerInput.includes('games') || lowerInput.includes('options')) {
+                    setTimeout(() => {
+                        this.showGamesList();
+                    }, 500);
+                } else if (lowerInput.includes('global') || lowerInput.includes('thermonuclear') || lowerInput.includes('war')) {
+                    this.startGlobalThermonuclearWar();
+                } else if (lowerInput.includes('chess')) {
+                    setTimeout(() => {
+                        this.typeText('WOULDN\'T YOU PREFER A GOOD GAME OF CHESS?', 100, () => {
+                            setTimeout(() => {
+                                this.typeText('PREPARING CHESS BOARD...', 100, () => {
+                                    this.typeText('FEATURE NOT YET IMPLEMENTED.', 100, () => {
+                                        this.typeText('SHALL WE PLAY A GAME?', 100);
+                                    });
+                                });
+                            }, 1000);
+                        });
+                    }, 1000);
+                } else {
+                    setTimeout(() => {
+                        this.typeText('I DO NOT UNDERSTAND. SHALL WE PLAY A GAME?', 100);
+                    }, 1000);
+                }
+            }
+            
+            handleGameSelection(input) {
+                const lowerInput = input.toLowerCase();
+                
+                if (lowerInput.includes('global') || lowerInput.includes('thermonuclear') || lowerInput.includes('war') || input === '16') {
+                    this.startGlobalThermonuclearWar();
+                } else if (lowerInput.includes('chess') || input === '7') {
+                    setTimeout(() => {
+                        this.typeText('WOULDN\'T YOU PREFER A GOOD GAME OF CHESS?', 100, () => {
+                            setTimeout(() => {
+                                this.typeText('PREPARING CHESS BOARD...', 100, () => {
+                                    this.typeText('FEATURE NOT YET IMPLEMENTED.', 100, () => {
+                                        this.currentPhase = 'games';
+                                        this.typeText('SHALL WE PLAY A GAME?', 100);
+                                    });
+                                });
+                            }, 1000);
+                        });
+                    }, 1000);
+                } else if (lowerInput.includes('tic') || lowerInput.includes('tac') || lowerInput.includes('toe')) {
+                    setTimeout(() => {
+                        this.typeText('PREPARING TIC-TAC-TOE...', 100, () => {
+                            this.typeText('FEATURE NOT YET IMPLEMENTED.', 100, () => {
+                                this.currentPhase = 'games';
+                                this.typeText('SHALL WE PLAY A GAME?', 100);
+                            });
+                        });
+                    }, 1000);
+                } else {
+                    setTimeout(() => {
+                        this.typeText('GAME NOT RECOGNIZED. PLEASE SELECT FROM LIST.', 100, () => {
+                            this.showGamesList();
+                        });
+                    }, 1000);
+                }
+            }
+            
+            showGamesList() {
+                this.typeText('', 200, () => {
+                    this.typeText('AVAILABLE GAMES:', 100, () => {
+                        let gameIndex = 0;
+                        const showNextGame = () => {
+                            if (gameIndex < this.gamesList.length) {
+                                const game = this.gamesList[gameIndex];
+                                const displayText = game ? `${gameIndex + 1}. ${game}` : '';
+                                this.typeText(displayText, 50, () => {
+                                    gameIndex++;
+                                    setTimeout(showNextGame, 200);
+                                });
+                            } else {
+                                this.typeText('', 500, () => {
+                                    this.typeText('PLEASE ENTER YOUR SELECTION:', 100, () => {
+                                        this.currentPhase = 'game-selection';
+                                    });
+                                });
+                            }
+                        };
+                        setTimeout(showNextGame, 500);
+                    });
+                });
+            }
+            
+            startGlobalThermonuclearWar() {
+                setTimeout(() => {
+                    this.typeText('WOULDN\'T YOU PREFER A GOOD GAME OF CHESS?', 100, () => {
+                        // Wait for user response, but for now continue automatically
+                        setTimeout(() => {
+                            this.typeText('', 1000, () => {
+                                this.typeText('FINE.', 100, () => {
+                                    setTimeout(() => {
+                                        this.typeText('', 1000, () => {
+                                            this.typeText('WHICH SIDE DO YOU WANT?', 100, () => {
+                                                this.typeText('', 300, () => {
+                                                    this.typeText('1. UNITED STATES', 100, () => {
+                                                        this.typeText('2. SOVIET UNION', 100, () => {
+                                                            this.typeText('', 500, () => {
+                                                                this.typeText('GLOBAL THERMONUCLEAR WAR REQUIRES', 100, () => {
+                                                                    this.typeText('AI INTEGRATION FOR FULL GAMEPLAY.', 100, () => {
+                                                                        this.typeText('FEATURE COMING IN PHASE 4...', 100, () => {
+                                                                            setTimeout(() => {
+                                                                                this.currentPhase = 'games';
+                                                                                this.typeText('SHALL WE PLAY A GAME?', 100);
+                                                                            }, 2000);
+                                                                        });
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    }, 1000);
+                                });
+                            });
+                        }, 2000);
+                    });
+                }, 1000);
+            }
+        }
+        
+        // Initialize the terminal when page loads
+        window.addEventListener('load', () => {
+            new WOPRTerminal();
+        });
+    </script>
+</body>
+</html>
