@@ -436,7 +436,7 @@ body {
     cursor: pointer;
     border: 3px outset #808080;
     border-radius: 5px;
-    font-family: 'Comic Sans MS', cursive;
+    /* font-family: 'Comic Sans MS', cursive; */
     transition: all 0.2s ease;
     box-shadow: 3px 3px 0px #808080;
 }
